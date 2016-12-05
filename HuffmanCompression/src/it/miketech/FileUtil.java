@@ -1,6 +1,9 @@
 package it.miketech;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,38 +12,17 @@ import java.util.List;
  */
 public class FileUtil {
 
-    public static int[] readFileByBytes(String fileName) {
-        File file = new File(fileName);
+    public static byte[] readFileByBytes(String path) {
+        Path mPath = Paths.get(path);
+        byte[] data = new byte[0];
 
-        List<Integer> bytesArr = new ArrayList();
-
-
-        InputStream in = null;
         try {
-            in = new FileInputStream(file);
-            int tempbyte;
-            while ((tempbyte = in.read()) != -1) {
-                bytesArr.add(tempbyte);
-            }
-            in.close();
-
+            data = Files.readAllBytes(mPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        int[] a = new int[bytesArr.size()];
-
-        for (int i=0;i<bytesArr.size();i++){
-            a[i] = bytesArr.get(i);
-        }
-
-        return a;
-    }
-
-    public static void main(String[] args) throws IOException {
-        readFileByBytes("/Users/Mike/Desktop/1.txt");
-
-
+        return data;
     }
 
 

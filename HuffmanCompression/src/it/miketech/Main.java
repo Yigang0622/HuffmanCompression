@@ -1,19 +1,22 @@
 package it.miketech;
 
+import java.io.IOException;
+
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        System.out.println(16/4);
-        System.out.println(13/4);
-        System.out.println(14/4);
+        String command = args[0];
+        String path = args[1];
 
-//        FileInputStream fis = new java.io.FileInputStream(path);
-//        //读入所有的文件字节
-//        while(fis.available()>0){
-//            int i=fis.read();
-//            byteCount[i]++;
-//        }
+        if (command.equals("compress")){
+            Compressor compressor = new Compressor(path);
+            compressor.compress();
+        }else if (command.equals("decompress")){
+            Decompressor decompressor = new Decompressor(path);
+            decompressor.decompress();
+        }
+
 
     }
 }

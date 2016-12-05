@@ -17,8 +17,7 @@ public class ByteUtil {
      */
     public static byte[] binStrToByteArr(String binStr){
 
-        System.out.println(binStr.length());
-        int segment = binStr.length()/4 + 0; //段
+        int segment = binStr.length()/4; //段
         int reminder = binStr.length()%4==0? 0 : 4 - binStr.length()%4;    //余数
 
         if (reminder!=0){
@@ -29,7 +28,6 @@ public class ByteUtil {
             binStr = binStr+'0';
         }
 
-        System.out.println(binStr);
 
         byte[] bytes = new byte[segment];
         for (int i=0;i< segment;i++){
@@ -67,7 +65,6 @@ public class ByteUtil {
         }
 
         for (int i=31;i>=32-len;i--){
-            System.out.println(i);
             arr[i] = (byte) (treeLen%10);
             treeLen /= 10;
         }
@@ -114,7 +111,6 @@ public class ByteUtil {
             }
         }
 
-        System.out.println("Tree Size "+bytes.length);
 
         return bytes;
     }

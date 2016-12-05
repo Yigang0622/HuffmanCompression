@@ -1,11 +1,7 @@
 package it.miketech;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.PriorityQueue;
 
 /**
@@ -14,10 +10,20 @@ import java.util.PriorityQueue;
 public class Compressor {
 
     private String treeStr = ""; //字典树压缩后的字符串
-    private String composedStr = ""; //前缀码字符串
+    private String compressedStr = ""; //前缀码字符串
 
+    private String originalFileName = ""; //文件名
+    private String absPath = "";//路径
+    private String filePath = ""; //路径+文件名
 
     private static final int R = 256; //ASCII码表
+
+    Compressor(String filePath) throws IOException {
+        this.filePath = filePath;
+        File tempFile =new File(filePath);
+        originalFileName = tempFile.getName();
+        absPath = tempFile.getParentFile().getCanonicalPath()+"/";
+    }
 
 
     private String[] buildCode(Node root){
@@ -79,81 +85,56 @@ public class Compressor {
      */
     private void writeTire(Node x){
         if (x.isLeaf()){
-            //System.out.print(1);
-           // System.out.print(x.ch);
             treeStr += '1';
             treeStr += x.ch;
             return;
         }
-       // System.out.print(0);
+
         treeStr += '0';
         writeTire(x.left);
         writeTire(x.right);
     }
 
-//
-//    /**
-//     * 重建单词查找树
-//     * @return Root Node
-//     */
-//    private Node readTire( ){
-//
-//        char a = treeStr.charAt(0);
-//        treeStr = treeStr.substring(1,treeStr.length());
-//
-//        if (a == '1'){
-//            char b = treeStr.charAt(0);
-//            treeStr = treeStr.substring(1,treeStr.length());
-//            return new Node(b,0,null,null);
-//        }
-//        return new Node('\0',0,readTire(),readTire());
-//    }
 
     public void compress() throws IOException {
 
-        String path = "/Users/Mike/Desktop/1.txt";
 
-        System.out.println("开始压缩: "+path);
+        System.out.println("开始压缩: "+filePath);
 
-        int[] freq = new int[R];
+        int[] freq = new int[R]; //频率表
 
-        Path mPath = Paths.get(path);
-        byte[] data = Files.readAllBytes(mPath);
-        //FileUtil.writeFile("/Users/Mike/Desktop/233.png",data);
+        byte[] data = FileUtil.readFileByBytes(filePath);
 
         for (byte b:data){
             freq[b+128]++;
         }
 
-        System.out.println("生成频率表----OK");
+        System.out.println("生成频率表");
 
         Node root = buildTrie(freq);
 
         //编译表
         String[] st = new String[R];
         st = buildCode(root);
-        System.out.println("生成编译表----OK");
-       // printCodeTable(st);
-
+        System.out.println("生成编译表");
 
         //压缩
         for (int i=0;i<data.length;i++){
             int index = data[i] + 128;
-            composedStr+= st[index];
+            compressedStr += st[index];
         }
+        System.out.println("生成前缀表");
 
-        System.out.println("生成前缀表----OK");
 
-        //生成字典树字符串
         writeTire(root);
-        System.out.println(treeStr);
-        System.out.println(composedStr);
-        System.out.println("生成字典树----OK");
-        byte[] fileName = ByteUtil.getFileNameByteArr("test.txt");
+        System.out.println("生成单词查找树");
+
+
+        byte[] fileName = ByteUtil.getFileNameByteArr(originalFileName);
         byte[] treeBytes = treeStr.getBytes();
         byte[] treeLength = ByteUtil.getByteArrForTreeLength(treeBytes.length);
-        byte[] reminder = {ByteUtil.getReminderByte(composedStr)};
-        byte[] compBinBytes = ByteUtil.binStrToByteArr(composedStr);
+        byte[] reminder = {ByteUtil.getReminderByte(compressedStr)};
+        byte[] compBinBytes = ByteUtil.binStrToByteArr(compressedStr);
 
 
 
@@ -162,13 +143,14 @@ public class Compressor {
         byte[] c = combine(b,reminder);
         byte[] d = combine(c,compBinBytes);
 
-        System.out.println("压缩后长度(比特): "+d.length);
+        System.out.println("压缩后大小: "+d.length+"比特");
 
-        FileUtil.writeFile("/Users/Mike/Desktop/compress.hc",d);
-
+        FileUtil.writeFile(absPath+"compress.hc",d);
+        System.out.println("压缩文件: "+absPath+"compress.hc 生成完毕");
     }
 
-    public static byte[] combine(byte[] a, byte[] b){
+    //合并 byte数组
+    private static byte[] combine(byte[] a, byte[] b){
         int length = a.length + b.length;
         byte[] result = new byte[length];
         System.arraycopy(a, 0, result, 0, a.length);
@@ -188,7 +170,8 @@ public class Compressor {
     }
 
     public static void main(String[] args) throws IOException {
-        Compressor c = new Compressor();
+        String path = "/Users/Mike/Desktop/x.txt";
+        Compressor c = new Compressor(path);
         c.compress();
        // c.expand();
     }
